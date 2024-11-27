@@ -1,136 +1,126 @@
-int ft_process_char(va_list args)
-{
-	char c;
-	int i;
-	
-	i = 0;
-	c = (char)va_arg(args, int);
-	write (1 , &c, 1);
-	return (i);
-}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: almejia- <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/09 02:54:04 by almejia-          #+#    #+#             */
+/*   Updated: 2024/09/18 12:46:31 by almejia-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int ft_process_str(va_list args)
+#include "ft_printf.h"
+
+int	ft_all(unsigned long long num, int d, int alert, const char *hex_chars)
 {
-	char *str;
-	int i;
-	
-	i = 0;
-	str = va_arg(args , char *);
-	while (str[i])
+	static int	c = 0;
+
+	if (alert == 2 && !num)
+		return (write(1, "(nil)", 5));
+	if (alert == 4 && !hex_chars)
+		return (write(1, "(null)", 6));
+	if (alert == 0 || alert == 2 || alert == 4)
+		c = 0;
+	if (alert == 4)
 	{
-		write(1 , str[i], 1);
-		++i;
+		while (hex_chars[c])
+			c += write(1, &hex_chars[c], 1);
+		return (c);
 	}
-	return(i);
+	if (alert == 2)
+		c += write(1, "0x", 2);
+	alert = 3;
+	if (num >= (unsigned long long)d)
+		ft_all(num / d, d, alert, hex_chars);
+	c += write(1, &hex_chars[(num % d)], 1);
+	return (c);
 }
 
-int ft_process_ptr(args)
+int	ft_ext_pf(const char *format, va_list args)
 {
-	char char_array = 123456789abcdef
-	unsigned long long addr;
-	void *ptr;
-	char buffer[20];
-	int i;
-	
-	i = 0;
-	shift = (sizeof(void *) * 8) - 4;
-	ptr = va_arg(args , void *);
-	addr = ptr;
-	buffer[0] = '0';
-	buffer[1] = 'x';
-	
-}
+	int		c;
+	int		num;
+	char	one_char;
 
-
-
-int process_int(va_list args)
-{
-	int num;
-	int i;
-
-	num = arg(args, int);
-	i = ft_putnbr(num);
-	return (i);
-}
-
-int ft_putnbr(int num)
-{
-	if (num = -2147483648)
+	c = 0;
+	num = 0;
+	if (*format == 'd' || *format == 'i')
 	{
-		write(1, "-2147483648", 11);
-	}	
-	if (num < 0)
-	{
-		write(1, '-', 1);
-		num = -num;
+		num = va_arg(args, int);
+		if (num < 0)
+		{
+			if (num == -2147483648)
+				return (write(1, "-2147483648", 11));
+			c += write(1, "-", 1);
+			num = -num;
+		}
+		c += ft_all((unsigned long long)num, 10, 0, "0123456789abcdef");
+		return (c);
 	}
-	if (num > 9)
-		ft_putnbr(num /= 10);
-	write (1, (num % 10 + 48), 1);
-{
-
-int ft_process_hex(va_list args)
-{
-	int i;
-	int hex;
-	static char hex_chars[] "0123456789abcdef";
-
-	i = 0;
-	hex = va_arg(args, int );
+	one_char = (char)va_arg(args, int);
+	c += write(1, &one_char, 1);
+	return (c);
 }
 
-
-int ft_process_format(const char *format, va_list args)
+int	ft_process_format(const char *format, va_list args)
 {
-	if (format == 'c')
-		ft_process_char(args);
-	if (format == 's')
-		ft_process_str(args);
-	if (format == 'p')
-		ft_process_ptr(args);
-	if (format == 'd')
-		ft_process_dec(args);
-	if (format == 'i')
-		ft_process_dec(args);
-	if (format == 'u')
-		ft_process_
-	if (format == 'x')
-		ft_process_low_hex(args);
-	if (format == 'X')
-		ft_process_up_hex(args);
-	if (format == '%')
-		write()
-	return (i);
+	if (*format == '%')
+		return (write(1, "%", 1));
+	if (*format == 's')
+		return (ft_all(1, 10, 4, (const char *)va_arg(args, char *)));
+	if (*format == 'u')
+		return (ft_all((unsigned long long)va_arg(args, unsigned int),
+				10, 0, "0123456789abcdef"));
+	if (*format == 'x')
+		return (ft_all((unsigned long long)va_arg(args, unsigned int),
+				16, 0, "0123456789abcdef"));
+	if (*format == 'X')
+		return (ft_all((unsigned long long)va_arg(args, unsigned int),
+				16, 0, "0123456789ABCDEF"));
+	if (*format == 'p')
+		return (ft_all((unsigned long long)va_arg(args, void *),
+				16, 2, "0123456789abcdef"));
+	if (*format == 'd' || *format == 'i' || *format == 'c')
+		return (ft_ext_pf(format, args));
+	return (-1);
 }
 
-int ft_the_real_printf(const char *format, va_list args)
+int	ft_search_format(const char *format, va_list args)
 {
-	static int i = 0;
-	
+	int	c;
+	int	aux;
+
+	c = 0;
+	aux = 0;
 	while (*format)
-        {
-		if (format == '%')
+	{
+		if (*format == '%')
 		{
 			format++;
-			i += ft_process_format(args);
+			aux = ft_process_format(format, args);
+			if (aux == -1)
+				c += write(1, "%", 1);
+			else
+				c += aux;
 		}
-        }
-	return(i);
+		else
+			c += write (1, format, 1);
+		format++;
+	}
+	return (c);
 }
 
-int ft_printf(const char *format, ...)
+int	ft_printf(const char *format, ...)
 {
-	int i;
-	va_list args;
-	va_start(args, format);
+	int		c;
+	va_list	args;
 
+	c = 0;
+	va_start(args, format);
 	if (!format)
 		return (0);
-	i = ft_the_real_printf(const char *format, va_list args);
-	return (i);
-}
-
-int main()
-{
-	
+	c += ft_search_format(format, args);
+	va_end(args);
+	return (c);
 }
