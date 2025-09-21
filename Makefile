@@ -15,7 +15,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror 
 AR = ar rcs
 
-SOURCES = ft_printf.c \
+SOURCES = src/ft_printf.c \
 
 OBJ = $(SOURCES:.c=.o)
 
